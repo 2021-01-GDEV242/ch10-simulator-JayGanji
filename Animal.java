@@ -1,10 +1,11 @@
 import java.util.List;
+import java.util.Random;
 
 /**
  * A class representing shared characteristics of animals.
  * 
- * @author David J. Barnes and Michael Kölling
- * @version 2016.02.29 (2)
+ * @author David J. Barnes and Michael Kölling modified by Jay Ganji
+ * @version 2021.04.12 (3)
  */
 public abstract class Animal
 {
@@ -14,6 +15,9 @@ public abstract class Animal
     private Field field;
     // The animal's position in the field.
     private Location location;
+    // Animal age
+    protected int age;
+    private static final Random rand = Randomizer.getRandom();
     
     /**
      * Create a new animal at location in field.
@@ -21,11 +25,12 @@ public abstract class Animal
      * @param field The field currently occupied.
      * @param location The location within the field.
      */
-    public Animal(Field field, Location location)
+    public Animal(boolean randomAge, Field field, Location location)
     {
         alive = true;
         this.field = field;
         setLocation(location);
+        age = 0;
     }
     
     /**
@@ -88,4 +93,79 @@ public abstract class Animal
     {
         return field;
     }
+    
+    /**
+     * Set the animal age
+     * @param age The animal's new age
+     */
+    protected void setAge(int age)
+    {
+        this.age = age;
+    }
+    
+    /**
+     * Return the animal's age.
+     * @return The animal's age.
+     */
+    protected int getAge()
+    {
+        return age;
+    }
+    
+    /**
+     * An animal can breed if it has reached the breeding age.
+     */
+    public boolean canBreed()
+    {
+        return age >= getBreedingAge();
+    }
+    
+    /**
+     * Return the breeding age of this animal.
+     * @return The breeding age of this animal.
+     */
+    abstract protected int getBreedingAge();
+    
+    /**
+     * Return the max age of this animal.
+     * @return The max age of this animal.
+     */
+    abstract protected int getMaxAge();
+    
+    /**
+     * Increase the age. This could result in the animal's death.
+     */
+    public void incrementAge()
+    {
+        age++;
+        if(age > getMaxAge()) {
+            setDead();
+        }
+    }
+    
+    /**
+     * Generate a number representing the number of births,
+     * if it can breed.
+     * @return The number of births (may be zero).
+     */
+    public int breed()
+    {
+        int births = 0;
+        if(canBreed() && rand.nextDouble() <= getBreedingProb()) {
+            births = rand.nextInt(getMaxLitterSize()) + 1;
+        }
+        return births;
+    }
+    
+    /**
+     * Return the breding probability of this animal.
+     * @return The breeding probability of this animal.
+     */
+    abstract protected double getBreedingProb();
+    
+    /**
+     * Return the max litter size of this animal.
+     * @return The max litter size of this animal.
+     */
+    abstract protected int getMaxLitterSize();
 }
